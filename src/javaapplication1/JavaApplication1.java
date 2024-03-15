@@ -5,10 +5,12 @@
 package javaapplication1;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JavaApplication1 {
     public static void main(String[] args) {
-         double[] arguments = {30, 45, 60, 90};
+        double[] arguments = {30, 45, 60, 90};
 
         int onesCount = CalculationManager.countOnes(arguments);
 
@@ -17,14 +19,32 @@ public class JavaApplication1 {
             StateManager.saveObject("result.dat", resultData);
             ResultData restoredResult = (ResultData) StateManager.restoreObject("result.dat");
 
+            ResultFactory resultFactory = new TextResultFactory();
+            ResultDisplay resultDisplay = resultFactory.createResultDisplay();
+
             System.out.println("Before serialization:");
-            resultData.printResult();
+            resultDisplay.display(resultData);
 
             System.out.println("\nAfter deserialization:");
-            restoredResult.printResult();
+            resultDisplay.display(restoredResult);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-        }    
+        }
+    }
+}
+
+interface ResultDisplay {
+    void display(ResultData result);
+}
+
+class TextResultDisplay implements ResultDisplay {
+    @Override
+    public void display(ResultData result) {
+        System.out.println("Arguments: ");
+        for (double arg : result.getArguments()) {
+            System.out.print(arg + " ");
+        }
+        System.out.println("\nOnes Count in Binary Representation of Average: " + result.getOnesCount());
     }
 }
 
@@ -60,12 +80,23 @@ class ResultData implements Serializable {
         this.onesCount = onesCount;
     }
 
-    public void printResult() {
-        System.out.println("Arguments: ");
-        for (double arg : arguments) {
-            System.out.print(arg + " ");
-        }
-        System.out.println("\nOnes Count in Binary Representation of Average: " + onesCount);
+    public double[] getArguments() {
+        return arguments;
+    }
+
+    public int getOnesCount() {
+        return onesCount;
+    }
+}
+
+interface ResultFactory {
+    ResultDisplay createResultDisplay();
+}
+
+class TextResultFactory implements ResultFactory {
+    @Override
+    public ResultDisplay createResultDisplay() {
+        return new TextResultDisplay();
     }
 }
 
